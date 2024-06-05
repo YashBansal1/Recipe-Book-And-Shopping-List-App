@@ -16,6 +16,6 @@ export class ShoppingEditComponent {
     const name = this.nameInputRef.nativeElement.value;
     const amount = this.amountInputRef.nativeElement.value;
     const newIngredient = new Ingredients(name, amount);
-    this.shoppingListService.addIngredients(newIngredient);
+    this.shoppingListService.addIngredient(newIngredient);
   }
 }
