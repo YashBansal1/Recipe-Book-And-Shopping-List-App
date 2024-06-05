@@ -6,10 +6,5 @@ import { Component, output } from '@angular/core';
   styleUrl: './header.component.css',
 })
 export class HeaderComponent {
-  featureSelected = output<string>();
   collapsed = true;
-
-  onSelect(feature: string) {
-    this.featureSelected.emit(feature);
-  }
 }

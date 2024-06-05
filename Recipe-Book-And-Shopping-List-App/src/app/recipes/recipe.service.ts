@@ -30,6 +30,10 @@ export class RecipeService {
     return this.recipes.slice(); //to not to return the direct reference of the array.
   }
 
+  getRecipe(id: number) {
+    return this.recipes[id];
+  }
+
   onAddIngredientsToShoppingList(ingredients: Ingredients[]) {
     this.shoppingListService.addIngredients(ingredients);
   }
