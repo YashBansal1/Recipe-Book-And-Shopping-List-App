@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, output } from '@angular/core';
 import { Ingredients } from '../../../shared/ingredient.model';
 import { Recipe } from '../../recipe.model';
 
@@ -8,5 +8,10 @@ import { Recipe } from '../../recipe.model';
   styleUrl: './recipe-item.component.css',
 })
 export class RecipeItemComponent {
+  selectedRecipe = output<void>();
   @Input() recipe: Recipe;
+
+  onSelected() {
+    this.selectedRecipe.emit();
+  }
 }
