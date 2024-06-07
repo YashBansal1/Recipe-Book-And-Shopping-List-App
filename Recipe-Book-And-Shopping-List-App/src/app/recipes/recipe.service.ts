@@ -2,7 +2,8 @@ import { EventEmitter, Injectable, output } from '@angular/core';
 import { Recipe } from './recipe.model';
 import { Ingredients } from '../shared/ingredient.model';
 import { ShoppingListService } from '../shopping-list/shopping-list.service';
-import { Subject } from 'rxjs';
+import { Subject, map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -11,22 +12,12 @@ export class RecipeService {
   //   recipeSelected = new Subject<Recipe>();
   recipesChanged = new Subject<Recipe[]>();
 
-  private recipes: Recipe[] = [
-    new Recipe(
-      'Burger',
-      'Burger Recipe',
-      'https://images.immediate.co.uk/production/volatile/sites/30/2013/05/2022-09-23GFOWEBFamilyRecipes-OnePotGarlicChicken05875preview-d8a4a42.jpg?quality=90&resize=556,505',
-      [new Ingredients('Meat', 1), new Ingredients('French Fries', 20)]
-    ),
-    new Recipe(
-      'Bread',
-      'Bread Recipe',
-      'https://images.immediate.co.uk/production/volatile/sites/30/2013/05/2022-09-23GFOWEBFamilyRecipes-OnePotGarlicChicken05875preview-d8a4a42.jpg?quality=90&resize=556,505',
-      [new Ingredients('Bread', 2), new Ingredients('Eggs', 4)]
-    ),
-  ];
+  private recipes: Recipe[] = [];
 
-  constructor(private shoppingListService: ShoppingListService) {}
+  constructor(
+    private shoppingListService: ShoppingListService,
+    private http: HttpClient
+  ) {}
 
   getRecipes() {
     return this.recipes.slice(); //to not to return the direct reference of the array.
@@ -53,5 +44,37 @@ export class RecipeService {
   deleteRecipe(id: number) {
     this.recipes.splice(id, 1);
     this.recipesChanged.next(this.recipes.slice());
+  }
+
+  storeRecipes() {
+    this.http
+      .put(
+        'https://ng-course-recipe-book-4bc36-default-rtdb.firebaseio.com/recipes.json',
+        this.recipes
+      )
+      .subscribe((response) => {
+        console.log(response);
+      });
+  }
+
+  fetchRecipes() {
+    this.http
+      .get<Recipe[]>(
+        'https://ng-course-recipe-book-4bc36-default-rtdb.firebaseio.com/recipes.json'
+      )
+      .pipe(
+        map((recipes) => {
+          return recipes.map((recipe) => {
+            return {
+              ...recipe,
+              ingredients: recipe.ingredients ? recipe.ingredients : [],
+            }; //to avoid undefined error
+          });
+        })
+      )
+      .subscribe((recipes) => {
+        this.recipes = recipes;
+        this.recipesChanged.next(this.recipes.slice());
+      });
   }
 }
