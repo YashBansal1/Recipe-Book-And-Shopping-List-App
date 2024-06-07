@@ -9,6 +9,7 @@ import { Subject } from 'rxjs';
 })
 export class RecipeService {
   //   recipeSelected = new Subject<Recipe>();
+  recipesChanged = new Subject<Recipe[]>();
 
   private recipes: Recipe[] = [
     new Recipe(
@@ -37,5 +38,20 @@ export class RecipeService {
 
   onAddIngredientsToShoppingList(ingredients: Ingredients[]) {
     this.shoppingListService.addIngredients(ingredients);
+  }
+
+  updateRecipe(id: number, updatedRecipe: Recipe) {
+    this.recipes[id] = updatedRecipe;
+    this.recipesChanged.next(this.recipes.slice());
+  }
+
+  addRecipe(recipe: Recipe) {
+    this.recipes.push(recipe);
+    this.recipesChanged.next(this.recipes.slice());
+  }
+
+  deleteRecipe(id: number) {
+    this.recipes.splice(id, 1);
+    this.recipesChanged.next(this.recipes.slice());
   }
 }
