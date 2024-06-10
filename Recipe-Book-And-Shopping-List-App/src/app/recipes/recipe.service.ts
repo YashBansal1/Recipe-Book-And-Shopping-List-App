@@ -2,8 +2,9 @@ import { EventEmitter, Injectable, output } from '@angular/core';
 import { Recipe } from './recipe.model';
 import { Ingredients } from '../shared/ingredient.model';
 import { ShoppingListService } from '../shopping-list/shopping-list.service';
-import { Subject, map, tap } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { Subject, exhaustMap, map, take, tap } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,8 @@ export class RecipeService {
 
   constructor(
     private shoppingListService: ShoppingListService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   getRecipes() {
@@ -58,23 +60,28 @@ export class RecipeService {
   }
 
   fetchRecipes() {
-    return this.http
-      .get<Recipe[]>(
-        'https://ng-course-recipe-book-4bc36-default-rtdb.firebaseio.com/recipes.json'
-      )
-      .pipe(
-        map((recipes) => {
-          return recipes?.map((recipe) => {
-            return {
-              ...recipe,
-              ingredients: recipe.ingredients ? recipe.ingredients : [],
-            }; //to avoid undefined error
-          });
-        }),
-        tap((recipes) => {
-          this.recipes = recipes;
-          this.recipesChanged.next(this.recipes.slice());
-        })
-      );
+    return this.authService.user.pipe(
+      take(1),
+      exhaustMap((user) => {
+        return this.http
+          .get<Recipe[]>(
+            'https://ng-course-recipe-book-4bc36-default-rtdb.firebaseio.com/recipes.json'
+          )
+          .pipe(
+            map((recipes) => {
+              return recipes?.map((recipe) => {
+                return {
+                  ...recipe,
+                  ingredients: recipe.ingredients ? recipe.ingredients : [],
+                }; //to avoid undefined error
+              });
+            }),
+            tap((recipes) => {
+              this.recipes = recipes;
+              this.recipesChanged.next(this.recipes.slice());
+            })
+          );
+      })
+    );
   }
 }

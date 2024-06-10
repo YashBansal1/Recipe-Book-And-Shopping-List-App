@@ -205,6 +205,7 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+/Recipe-Book-And-Shopping-List-App/src/app/shared/api-keys.ts
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,angular
 
 
